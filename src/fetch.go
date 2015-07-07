@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/odeke-em/drive/config"
+	"github.com/odeke-em/friff/src"
 )
 
 const (
@@ -339,4 +340,8 @@ func printFetchChangeList(clArg *changeListArg) (bool, *map[Operation]sizeCounte
 	logy.Logf("%s %d\n", description, len(changes))
 
 	return promptForChanges(), nil
+}
+
+func (g *Commands) chunkify(f *File) (chunks map[uint]*friff.Shadow) {
+	return chunks
 }
