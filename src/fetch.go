@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/odeke-em/drive/config"
-	"github.com/odeke-em/friff/src"
 )
 
 const (
@@ -172,7 +171,7 @@ func (g *Commands) removeIndex(wg *sync.WaitGroup, f *File) (err error) {
 		return
 	}
 
-	index := f.ToIndex()
+	index := f.ToIndex(f.BlobAt)
 	rmErr := g.context.RemoveIndex(index, g.context.AbsPathOf(""))
 
 	// TODO: Should indexing errors be reported?
@@ -308,11 +307,11 @@ func (g *Commands) pruneStaleIndices() (deletions chan string, err error) {
 	return
 }
 
-func (g *Commands) createIndex(f *File) (err error) {
+func (g *Commands) createIndex(f *File, alternatePaths ...string) (err error) {
 	if f == nil {
 		return config.ErrDerefNilIndex
 	}
-	index := f.ToIndex()
+	index := f.ToIndex(alternatePaths...)
 	return g.context.SerializeIndex(index)
 }
 
@@ -340,8 +339,4 @@ func printFetchChangeList(clArg *changeListArg) (bool, *map[Operation]sizeCounte
 	logy.Logf("%s %d\n", description, len(changes))
 
 	return promptForChanges(), nil
-}
-
-func (g *Commands) chunkify(f *File) (chunks map[uint]*friff.Shadow) {
-	return chunks
 }

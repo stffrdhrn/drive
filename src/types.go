@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/odeke-em/drive/config"
+	"github.com/odeke-em/friff/src"
 	drive "github.com/odeke-em/google-api-go-client/drive/v2"
 )
 
@@ -433,10 +434,30 @@ func (c *Change) Op() Operation {
 	return op
 }
 
-func (f *File) ToIndex() *config.Index {
+func (f *File) isChunkable() bool {
+    if f == nil || f.IsDir || hasExportLinks(f) {
+        return false
+    }
+    return f.BlobAt != ""
+}
+
+func (f *File) ToIndex(alternatePaths ...string) *config.Index {
+    var chunks []*friff.Shadow
+
+    if f.isChunkable() && len(alternatePaths) >= 1 {
+        ckmap, ckErr := friff.Chunkify(alternatePaths[0])
+        if ckErr == nil {
+            for _, shad := range ckmap {
+                chunks = append(chunks, shad)
+            }
+        }
+    }
+
+    // fmt.Println("chunks", chunks)
 	return &config.Index{
-		FileId:      f.Id,
+        Chunks:      chunks,
 		Etag:        f.Etag,
+		FileId:      f.Id,
 		Md5Checksum: f.Md5Checksum,
 		MimeType:    f.MimeType,
 		ModTime:     f.ModTime.Unix(),

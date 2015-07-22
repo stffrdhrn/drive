@@ -216,7 +216,7 @@ func (g *Commands) PushPiped() (err error) {
 			continue
 		}
 
-		index := rem.ToIndex()
+		index := rem.ToIndex(g.context.AbsPathOf(relToRootPath))
 		wErr := g.context.SerializeIndex(index)
 
 		// TODO: Should indexing errors be reported?
@@ -361,7 +361,7 @@ func (g *Commands) remoteMod(change *Change) (err error) {
 	if rem == nil {
 		return
 	}
-	index := rem.ToIndex()
+	index := rem.ToIndex(absPath)
 	wErr := g.context.SerializeIndex(index)
 
 	// TODO: Should indexing errors be reported?

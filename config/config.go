@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/boltdb/bolt"
+	"github.com/odeke-em/friff/src"
 )
 
 var (
@@ -55,13 +56,14 @@ type Context struct {
 }
 
 type Index struct {
-	FileId      string `json:"id"`
-	Etag        string `json:"etag"`
-	Md5Checksum string `json:"md5"`
-	MimeType    string `json:"mtype"`
-	ModTime     int64  `json:"mtime"`
-	Version     int64  `json:"version"`
-	IndexTime   int64  `json:"itime"`
+	FileId      string          `json:"id"`
+	Etag        string          `json:"etag"`
+	Md5Checksum string          `json:"md5"`
+	MimeType    string          `json:"mtype"`
+	ModTime     int64           `json:"mtime"`
+	Version     int64           `json:"version"`
+	IndexTime   int64           `json:"itime"`
+	Chunks      []*friff.Shadow `json:"shadow"`
 }
 
 type MountPoint struct {
@@ -288,27 +290,27 @@ func (c *Context) Write() (err error) {
 }
 
 func (c *Context) DeInitialize(prompter func(...interface{}) bool, returnOnAnyError bool) (err error) {
-    rootDir := c.AbsPathOf("")
-    pathsToRemove := []string{
-	    credentialsPath(rootDir),
-	    DbSuffixedPath(rootDir),
-    }
+	rootDir := c.AbsPathOf("")
+	pathsToRemove := []string{
+		credentialsPath(rootDir),
+		DbSuffixedPath(rootDir),
+	}
 
-    for _, p := range pathsToRemove {
-        if !prompter("remove: ", p, ". This operation is permanent (Y/N) ") {
-            continue
-        }
+	for _, p := range pathsToRemove {
+		if !prompter("remove: ", p, ". This operation is permanent (Y/N) ") {
+			continue
+		}
 
-        rmErr := os.RemoveAll(p)
-        if rmErr != nil {
-            if returnOnAnyError {
-                return rmErr
-            }
-            fmt.Fprintf(os.Stderr, "deinit.removeAll: %s %v\n", p, rmErr)
-        }
-    }
+		rmErr := os.RemoveAll(p)
+		if rmErr != nil {
+			if returnOnAnyError {
+				return rmErr
+			}
+			fmt.Fprintf(os.Stderr, "deinit.removeAll: %s %v\n", p, rmErr)
+		}
+	}
 
-    return nil
+	return nil
 }
 
 // Discovers the gd directory, if no gd directory or credentials
@@ -346,7 +348,7 @@ func Initialize(absPath string) (pathGD string, firstInit bool, c *Context, err 
 		if os.IsNotExist(sErr) {
 			firstInit = true
 		} else { // An err not related to path existance
-            err = sErr
+			err = sErr
 			return
 		}
 	}
