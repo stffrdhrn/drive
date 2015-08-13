@@ -1,15 +1,13 @@
-# god
+# drive-pages
+Pages for drive
 
-`god` is a tiny program to pull or push files and directories from Google Drive. You need go tools installed in order to build the program.
 
-    go get github.com/rakyll/god
-    
+##Some lame notes. It's basicly a static webpage. Can use markdown and html etc to generate the pages.
+The content for each page is found in /input and assests is home for index.. gonna fix this later lol.
 
-Use `god --help` for further reference.
+You may notice a makefile, this is because it uses redcarpet to read the input files and gen the html.
+If redcarpet isnt cool, we can use something else. I copied SOME of the info from the main readme
+from the project. Eventually we'll fix what we need...
 
-* `$ god init [--C <path>]`
-* `$ god auth [--C <path>]` // starts the authorization and authentication wizard
-* `$ god pull [--C <path>] [--recursive=true]` // pulls from remote
-* `$ god push [--C <path>] [--recursive=true]` // pushes to the remote
-* `$ god stat [--C <path>]` // shows current upload and download status
-* `$ god diff [--C <filepath>]` // outputs a diff of local and remote
+So you generate you, need to install redcarpet. (it's a nice simple ruby gem https://github.com/vmg/redcarpet)
+Edit the input files to edit the content for the pages. Then run make in the dir... and thats it. 

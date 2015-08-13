@@ -1,0 +1,64 @@
+<html>
+	<head>
+		<meta charset="utf8" />
+		<title>drive &mdash; a tiny command line client for Google Drive</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="content">
+		
+			<div id="header">
+				<a class="btn btn-primary" style="float: right; font-size:18pt; padding:1em;" href="https://github.com/odeke-em/drive">Download</a>
+				<div style="font-size: 32pt;">drive</div>
+				<div style="color: #919191;">A tiny command line client for Google Drive</div>
+			</div>
+			
+			<div>
+				<div class="section">A beautifully simple client</div>
+				
+				<p class="text">
+					<b>drive</b> is a tiny command line client to push or pull files from your Google Drive. It is written in Go and has been battle-tested on 100GB+ accounts.
+				</p>
+				
+				<br /><div class="section">Installation is easy</div>
+				
+				<p class="text">
+					You'll need <a href="http://golang.org">Go 1.3 or higher</a> installed on your system. 
+				</p>
+				
+				<pre>go get -u github.com/odeke-em/drive/cmd/drive</pre>
+				
+				<br /><div class="section">Setup and basic useage</div>
+				
+				<p class="text">
+					Create a folder that will act as your local Google Drive, for example:
+				</p>
+				
+				<pre>mkdir ~/Google\ Drive && cd ~/Google\ Drive
+drive init
+drive pull
+echo "hello" > file.txt
+drive push</pre>
+
+				<br /><div class="section">A sweet suite of features</div>
+				
+				<p class="text">
+					<b>drive</b> supports 20+ features such as sharing, renaming, and moving files.  View the complete <a href="https://github.com/odeke-em/drive">documentation</a> in the Readme.
+				</p>
+				
+				<br /><div class="section">Support</div>
+				
+				<p class="text">
+					<b>drive</b> is developed by <a href="https://github.com/odeke-em">Emmanuel Odeke</a>. For questions or if you run into any issues hop over to the project's <a href="https://github.com/odeke-em/drive/issues">GitHub Issues</a> page.
+				</p>
+				
+			</div>
+			
+			<div>
+				<img src="http://media.giphy.com/media/N38v1Y2lKO9I4/giphy.gif" height="64px" />
+			</div>
+			
+		</div>
+	</body>
+</html>
+
