@@ -19,7 +19,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/odeke-em/drive/config"
@@ -347,8 +346,8 @@ func (g *Commands) resolveChangeListRecv(clr *changeListResolve) (cl, clashes []
 		chunkCount += 1
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(chunkCount)
+	doneCount := uint64(0)
+	doneChan := make(chan bool)
 
 	clashesMap := make(map[int][]*Change)
 
@@ -358,11 +357,19 @@ func (g *Commands) resolveChangeListRecv(clr *changeListResolve) (cl, clashes []
 			end = srcLen
 		}
 
-		go g.changeSlice(clashesMap, j, &wg, clr.push, &cl, base, dirlist[i:end])
+		doneCount += 1
+
+		go func(clm map[int][]*Change, id int, push bool, cll *[]*Change, p string, dlist []*dirList) {
+			g.changeSlice(clashesMap, id, push, cll, p, dlist)
+			doneChan <- true
+		}(clashesMap, j, clr.push, &cl, base, dirlist[i:end])
 
 		i += chunkSize
 	}
-	wg.Wait()
+
+	for i := uint64(0); i < doneCount; i++ {
+		<-doneChan
+	}
 
 	for _, cclashes := range clashesMap {
 		clashes = append(clashes, cclashes...)
@@ -375,8 +382,7 @@ func (g *Commands) resolveChangeListRecv(clr *changeListResolve) (cl, clashes []
 	return cl, clashes, err
 }
 
-func (g *Commands) changeSlice(clashesMap map[int][]*Change, id int, wg *sync.WaitGroup, push bool, cl *[]*Change, p string, dlist []*dirList) {
-	defer wg.Done()
+func (g *Commands) changeSlice(clashesMap map[int][]*Change, id int, push bool, cl *[]*Change, p string, dlist []*dirList) {
 	for _, l := range dlist {
 		// Avoiding path.Join which normalizes '/+' to '/'
 		var joined string
@@ -395,18 +401,17 @@ func (g *Commands) changeSlice(clashesMap map[int][]*Change, id int, wg *sync.Wa
 		}
 
 		childChanges, childClashes, cErr := g.resolveChangeListRecv(clr)
-		if cErr == nil {
-			*cl = append(*cl, childChanges...)
+
+		if len(childClashes) >= 1 {
+			clashesMap[id] = childClashes
+		}
+
+		if cErr != nil && cErr != ErrPathNotExists {
+			g.log.LogErrf("%s: %v\n", p, cErr)
 			continue
 		}
 
-		if cErr == ErrClashesDetected {
-			clashesMap[id] = childClashes
-			continue
-		} else if cErr != ErrPathNotExists {
-			g.log.LogErrf("%s: %v\n", p, cErr)
-			break
-		}
+		*cl = append(*cl, childChanges...)
 	}
 }
 
