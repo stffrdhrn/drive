@@ -84,6 +84,7 @@ const (
 	MimeKey               = "mime-key"
 	DriveRepoRelPath      = "github.com/odeke-em/drive"
 	UrlKey                = "url"
+	IFSKey                = "ifs"
 )
 
 const (
@@ -137,6 +138,7 @@ const (
 	DescOpen               = "open a file in the appropriate filemanager or default browser"
 	DescUrl                = "returns the url of each file"
 	DescVerbose            = "show step by step information verbosely"
+	DescIFS                = "internal field separator"
 )
 
 const (
@@ -162,6 +164,7 @@ const (
 	CLIOptionOpen               = "open"
 	CLIOptionWebBrowser         = "web-browser"
 	CLIOptionFileBrowser        = "file-browser"
+	CLIOptionIFS                = "ifs"
 )
 
 const (
@@ -169,6 +172,7 @@ const (
 	GoogleApiClientSecretEnvKey = "GOOGLE_API_CLIENT_SECRET"
 	DriveGoMaxProcsKey          = "DRIVE_GOMAXPROCS"
 	GoMaxProcsKey               = "GOMAXPROCS"
+	IFSEnvKey                   = "IFS"
 )
 
 const (

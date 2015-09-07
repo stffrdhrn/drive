@@ -244,6 +244,7 @@ type listCmd struct {
 	exactOwner   *string
 	notOwner     *string
 	sort         *string
+	ifs          *string
 }
 
 func (cmd *listCmd) Flags(fs *flag.FlagSet) *flag.FlagSet {
@@ -269,6 +270,7 @@ func (cmd *listCmd) Flags(fs *flag.FlagSet) *flag.FlagSet {
 	cmd.exactOwner = fs.String(drive.CLIOptionExactOwner, "", drive.DescExactOwner)
 	cmd.notOwner = fs.String(drive.CLIOptionNotOwner, "", drive.DescNotOwner)
 	cmd.byId = fs.Bool(drive.CLIOptionId, false, "list by id instead of path")
+	cmd.ifs = fs.String(drive.CLIOptionIFS, "", drive.DescIFS)
 
 	return fs
 }
@@ -305,6 +307,7 @@ func (cmd *listCmd) Run(args []string) {
 	}
 
 	meta := map[string][]string{
+		drive.IFSKey:          drive.NonEmptyTrimmedStrings(*cmd.ifs),
 		drive.SortKey:         drive.NonEmptyTrimmedStrings(*cmd.sort),
 		drive.SkipMimeKeyKey:  drive.NonEmptyTrimmedStrings(strings.Split(*cmd.skipMimeKey, ",")...),
 		drive.MatchMimeKeyKey: drive.NonEmptyTrimmedStrings(strings.Split(*cmd.matchMimeKey, ",")...),
