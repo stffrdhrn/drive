@@ -311,7 +311,7 @@ func (g *Commands) resolveChangeListRecv(clr *changeListResolve) (cl, clashes []
 		remoteChildren = make(chan *File)
 		close(remoteChildren)
 	}
-	dirlist, clashingFiles := merge(remoteChildren, localChildren, g.opts.IgnoreNameClashes)
+	dirlist, clashingFiles := merge(remoteChildren, localChildren, g.opts.IgnoreNameClashes, true)
 
 	if !g.opts.IgnoreNameClashes && len(clashingFiles) >= 1 {
 		if rootLike(base) {
@@ -403,9 +403,14 @@ func (g *Commands) changeSlice(clashesMap map[int][]*Change, id int, wg *sync.Wa
 	}
 }
 
-func merge(remotes, locals chan *File, ignoreClashes bool) (merged []*dirList, clashes []*File) {
+// merge builds a uniq list of files by name combining both local (whats in the current path)
+// and remote (whats on the drive service) into a list of dirList structs.  Its possible for 
+// remote files to have the same name, if we see this then these are added to the returned 
+// clashes array.
+// If ignoreClashes is enabled then both remotes are added to the list. 
+func merge(remotes, locals chan *File, ignoreClashes, keepLarger bool) (merged []*dirList, clashes []*File) {
 	localsMap := map[string]*File{}
-	remotesMap := map[string]*File{}
+	remotesMap := map[string]*dirList{}
 
 	uniqClashes := map[string]bool{}
 
@@ -426,18 +431,29 @@ func merge(remotes, locals chan *File, ignoreClashes bool) (merged []*dirList, c
 		localsMap[l.Name] = l
 	}
 
+	// for each remote, create a list entry and merge it with a local
+	// a local entry will only be used once
 	for r := range remotes {
 		list := &dirList{remote: r}
 
 		if !ignoreClashes {
 			prev, present := remotesMap[r.Name]
-			if present {
+			if present && !keepLarger {
 				registerClash(r)
-				registerClash(prev)
+				registerClash(prev.remote)
 				continue
+			} else if present && keepLarger {
+				fmt.Println("File conflict: ", r.Name, r.Size, prev.remote.Size)
+				if r.Size > prev.remote.Size {
+					fmt.Println(" resolved, discarding old", prev.remote.Id, "keeping", r.Id)
+					prev.remote = r
+				} else {
+					fmt.Println(" resolved, ignoring new  ", r.Id, "keeping", prev.remote.Id)
+				}
+                                continue
 			}
 
-			remotesMap[r.Name] = r
+			remotesMap[r.Name] = list
 		}
 
 		l, ok := localsMap[r.Name]
